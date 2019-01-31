@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using CustomVision;
 using CustomVison;
 using HoloToolkit.Unity.SpatialMapping;
 using HoloToolkit.UX.ToolTips;
@@ -21,13 +23,24 @@ public class ObjectLabeler : MonoBehaviour
     [SerializeField]
     private GameObject _debugObject;
 
+
+    [SerializeField]
+    private AudioClip _succesSoundClip;
+
+    [SerializeField]
+    private AudioClip _failureSoundClip;
+
+    private AudioSource _audio;
+
+
     private void Start()
     {
         Messenger.Instance.AddListener<ObjectRecognitionResultMessage>(
             p => LabelObjects(p.Predictions, p.CameraResolution, p.CameraTransform));
+        _audio = GetComponent<AudioSource>();
     }
 
-    public virtual void LabelObjects(IList<Prediction> predictions, 
+    public virtual void LabelObjects(IList<PredictionModel> predictions,
         Resolution cameraResolution, Transform cameraTransform)
     {
         ClearLabels();
@@ -35,6 +48,7 @@ public class ObjectLabeler : MonoBehaviour
         var topCorner = cameraTransform.position + cameraTransform.forward -
                         cameraTransform.right / 2f +
                         cameraTransform.up * heightFactor / 2f;
+        PlaySound(predictions.Any());
         foreach (var prediction in predictions)
         {
             var center = prediction.GetCenter();
@@ -42,7 +56,7 @@ public class ObjectLabeler : MonoBehaviour
                                 cameraTransform.up * center.y * heightFactor;
 
 #if UNITY_EDITOR
-             _createdObjects.Add(CreateLabel(_labelText, recognizedPos));
+            _createdObjects.Add(CreateLabel(_labelText, recognizedPos));
 #endif
             var labelPos = DoRaycastOnSpatialMap(cameraTransform, recognizedPos);
             if (labelPos != null)
@@ -53,7 +67,7 @@ public class ObjectLabeler : MonoBehaviour
 
         if (_debugObject != null)
         {
-             _debugObject.SetActive(false);
+            _debugObject.SetActive(false);
         }
 
         Destroy(cameraTransform.gameObject);
@@ -63,8 +77,8 @@ public class ObjectLabeler : MonoBehaviour
     {
         RaycastHit hitInfo;
 
-        if (SpatialMappingManager.Instance != null && 
-            Physics.Raycast(cameraTransform.position, (recognitionCenterPos - cameraTransform.position), 
+        if (SpatialMappingManager.Instance != null &&
+            Physics.Raycast(cameraTransform.position, (recognitionCenterPos - cameraTransform.position),
                 out hitInfo, 10, SpatialMappingManager.Instance.LayerMask))
         {
             return hitInfo.point;
@@ -96,6 +110,20 @@ public class ObjectLabeler : MonoBehaviour
         connector.PivotDirectionOrient = ConnectorOrientType.OrientToCamera;
         connector.Target = labelObject;
         return labelObject;
+    }
+
+    private void PlaySound(bool success)
+    {
+        PlaySound(success ? _succesSoundClip : _failureSoundClip);
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip != null && _audio != null)
+        {
+            _audio.clip = clip;
+            _audio.Play();
+        }
     }
 }
 

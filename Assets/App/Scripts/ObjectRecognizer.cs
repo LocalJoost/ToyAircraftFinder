@@ -1,51 +1,79 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using CustomVison;
+using CustomVision;
 using HoloToolkitExtensions.Messaging;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Networking;
+#if UNITY_WSA && !UNITY_EDITOR
+using System.Threading.Tasks;
+using Windows.Graphics.Imaging;
+using Windows.Media;
+#endif
 
 public class ObjectRecognizer : MonoBehaviour
 {
-    [SerializeField]
-    private string _liveDataUrl = "<your custom vision app url here>";
+#if UNITY_WSA && !UNITY_EDITOR
+    private ObjectDetection _objectDetection;
+#endif
 
-    [SerializeField]
-    private string _predictionKey = "<your prediction key here>";
+    private bool _isInitialized;
 
     private void Start()
     {
         Messenger.Instance.AddListener<PhotoCaptureMessage>(p=> RecognizeObjects(p.Image, p.CameraResolution, p.CameraTransform));
-    }
+#if UNITY_WSA && !UNITY_EDITOR
 
-    public virtual void RecognizeObjects(IList<byte> image, Resolution cameraResolution, Transform cameraTransform)
-    {
-        StartCoroutine(RecognizeObjectsInternal(image, cameraResolution, cameraTransform));
+        _objectDetection = new ObjectDetection(new[]{"aircraft"}, 20, 0.5f,0.3f );
+        Debug.Log("Initializing...");
+        _objectDetection.Init("ms-appx:///Data/StreamingAssets/model.onnx").ContinueWith(p =>
+        {
+            Debug.Log("Intializing ready");
+            _isInitialized = true;
+        });
+#endif
     }
-
-    private IEnumerator RecognizeObjectsInternal(IEnumerable<byte> image, 
-        Resolution cameraResolution, Transform cameraTransform)
+    
+    public virtual void RecognizeObjects(IList<byte> image, 
+                                         Resolution cameraResolution, 
+                                         Transform cameraTransform)
     {
-        var request = UnityWebRequest.Post(_liveDataUrl, string.Empty);
-        request.SetRequestHeader("Prediction-Key", _predictionKey);
-        request.SetRequestHeader("Content-Type", "application/octet-stream");
-        request.uploadHandler = new UploadHandlerRaw(image.ToArray());
-        yield return request.SendWebRequest();
-        var text = request.downloadHandler.text;
-        var result = JsonConvert.DeserializeObject<CustomVisionResult>(text);
-        if (result != null)
+        if (_isInitialized)
         {
-            result.Predictions.RemoveAll(p => p.Probability < 0.7);
-            Debug.Log("#Predictions = " + result.Predictions.Count);
-            Messenger.Instance.Broadcast(
-                new ObjectRecognitionResultMessage(result.Predictions, cameraResolution, cameraTransform));
-        }
-        else
-        {
-            Debug.Log("Predictions is null");
+#if UNITY_WSA && !UNITY_EDITOR
+            RecognizeObjectsAsync(image, cameraResolution, cameraTransform);
+#endif
+
         }
     }
+
+#if UNITY_WSA && !UNITY_EDITOR
+
+    private async Task RecognizeObjectsAsync(IList<byte> image, Resolution cameraResolution, Transform cameraTransform)
+    {
+        //https://stackoverflow.com/questions/35070622/photo-capture-stream-to-softwarebitmap
+        //https://blogs.msdn.microsoft.com/appconsult/2018/05/23/add-a-bit-of-machine-learning-to-your-windows-application-thanks-to-winml/
+        using (var stream = new MemoryStream(image.ToArray()))
+        {
+            var decoder = await BitmapDecoder.CreateAsync(stream.AsRandomAccessStream());
+            var sfbmp = await decoder.GetSoftwareBitmapAsync();
+            sfbmp = SoftwareBitmap.Convert(sfbmp, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+            var picture = VideoFrame.CreateWithSoftwareBitmap(sfbmp);
+            var prediction = await _objectDetection.PredictImageAsync(picture);
+            ProcessPredictions(prediction, cameraResolution, cameraTransform);
+        }
+    }
+#endif
+
+#if UNITY_WSA && !UNITY_EDITOR
+
+    private void ProcessPredictions(IList<PredictionModel>predictions, Resolution cameraResolution, Transform cameraTransform)
+    {
+        var acceptablePredications = predictions.Where(p => p.Probability >= 0.7).ToList();
+        Messenger.Instance.Broadcast(
+         new ObjectRecognitionResultMessage(acceptablePredications, cameraResolution, cameraTransform));
+    }
+#endif
+
 }
 

@@ -630,6 +630,7 @@ GameObject:
   - component: {fileID: 1892836090}
   - component: {fileID: 1892836092}
   - component: {fileID: 1892836094}
+  - component: {fileID: 1892836096}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -648,7 +649,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d99105403d3096045888a4be9e556752, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _debugPane: {fileID: 166039496}
+  _debugPane: {fileID: 0}
+  _clickSoundClip: {fileID: 8300000, guid: 394a2f7fe2ce5e547bb610be8543a1fe, type: 3}
 --- !u!4 &1892836091
 Transform:
   m_ObjectHideFlags: 0
@@ -673,8 +675,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fdbe62ccc739d2468e9b93e0f9dc73e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _liveDataUrl: <your custom vision app url here>
-  _predictionKey: <your prediction key here>
 --- !u!114 &1892836093
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -701,7 +701,9 @@ MonoBehaviour:
     type: 2}
   _labelContainer: {fileID: 1366272162}
   _labelText: Toy aircraft
-  _debugObject: {fileID: 1348938022}
+  _debugObject: {fileID: 0}
+  _succesSoundClip: {fileID: 8300000, guid: 312c401bc16b12b45abbad386a96c228, type: 3}
+  _failureSoundClip: {fileID: 8300000, guid: 44d6bbfb201bde94db9d0313c70e740e, type: 3}
 --- !u!114 &1892836095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -713,3 +715,83 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b52cc60d5440a041adf053aa8cfd925, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!82 &1892836096
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1892836089}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0

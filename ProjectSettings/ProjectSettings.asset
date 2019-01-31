@@ -568,7 +568,7 @@ PlayerSettings:
   metroCertificatePassword: 
   metroCertificateSubject: DefaultCompany
   metroCertificateIssuer: DefaultCompany
-  metroCertificateNotAfter: 803ec671c5a3d501
+  metroCertificateNotAfter: 0035342994b6d501
   metroApplicationDescription: ToyAircraftFinder
   wsaImages: {}
   metroTileShortName: 

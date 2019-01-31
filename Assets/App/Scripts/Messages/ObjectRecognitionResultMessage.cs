@@ -1,14 +1,14 @@
 ﻿
 using System.Collections.Generic;
-using CustomVison;
+using CustomVision;
 using UnityEngine;
 
 public class ObjectRecognitionResultMessage : ObjectRecognitionMessageBase
 {
-    public IList<Prediction> Predictions { get; protected set; }
+    public IList<PredictionModel> Predictions { get; protected set; }
 
 
-    public ObjectRecognitionResultMessage(IList<Prediction> predictions, 
+    public ObjectRecognitionResultMessage(IList<PredictionModel> predictions, 
         Resolution cameraResolution, Transform cameraTransform) : 
         base( cameraResolution, cameraTransform)
     {

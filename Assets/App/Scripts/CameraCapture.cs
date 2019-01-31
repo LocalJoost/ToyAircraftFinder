@@ -15,11 +15,17 @@ public class CameraCapture : MonoBehaviour, IInputClickHandler
     [SerializeField]
     private GameObject _debugPane;
 
+    [SerializeField]
+    private AudioClip _clickSoundClip;
+
+    private AudioSource _audio;
+
     // Use this for initialization
     void Start()
     {
         _cameraResolution =
             PhotoCapture.SupportedResolutions.OrderByDescending(res => res.width * res.height).First();
+        _audio = GetComponent<AudioSource>();
     }
 
     public void TakePicture()
@@ -84,6 +90,7 @@ public class CameraCapture : MonoBehaviour, IInputClickHandler
 
     public void OnInputClicked(InputClickedEventData eventData)
     {
+        PlaySound();
         TakePicture();
     }
 
@@ -96,4 +103,12 @@ public class CameraCapture : MonoBehaviour, IInputClickHandler
         return g.transform;
     }
 
+    private void PlaySound()
+    {
+        if (_audio != null && _clickSoundClip != null)
+        {
+            _audio.clip = _clickSoundClip;
+            _audio.Play();
+        }
+    }
 }
